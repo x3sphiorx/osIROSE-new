@@ -22,7 +22,12 @@ matrix:
     language: cpp
     addons:
       apt:
-        sources: *sources
+        sources: &sources		
+        - ubuntu-toolchain-r-test
+        - extras-precise
+        - boost-latest	
+        - kalakris-cmake
+        - llvm-toolchain-precise-3.8
         packages:
         - cmake
         - lcov
