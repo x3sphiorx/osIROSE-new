@@ -213,7 +213,7 @@ matrix:
     - cd build
     - "../ci/script.sh"
     
-  - env: g++-6 coverity_scan
+  - env: g++-6 coverity_scan BUILD_TYPE=Release
     sudo: required
     language: cpp
     addons:
