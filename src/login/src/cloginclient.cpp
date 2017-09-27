@@ -99,8 +99,8 @@ bool CLoginClient::UserLogin(std::unique_ptr<RoseCommon::CliLoginReq> P) {
   std::string clientpass = Core::escapeData(P->password());
 
   auto conn = Core::connectionPool.getConnection(Core::osirose);
-  Core::AccountTable table;
-  Core::SessionTable session;
+  Core::AccountTable table{};
+  Core::SessionTable session{};
   try {
     const auto res = conn(sqlpp::select(table.id, table.password, table.access, table.active, table.online, table.loginCount)
               .from(table).where(table.username == username_
@@ -110,7 +110,7 @@ bool CLoginClient::UserLogin(std::unique_ptr<RoseCommon::CliLoginReq> P) {
             const auto &row = res.front();
             const auto ses = conn(sqlpp::select(session.id).from(session).where(session.userid == row.id));
             if (!row.access.is_null())
-                access_rights_ = row.access;
+                access_rights_ = static_cast<decltype(access_rights_)>(row.access);
 
             if (access_rights_ < 1) {
                 // Banned
@@ -120,7 +120,7 @@ bool CLoginClient::UserLogin(std::unique_ptr<RoseCommon::CliLoginReq> P) {
 
             if (!row.online && ses.empty()) {
                 // Okay to login!!
-                userid_ = row.id;
+                userid_ = static_cast<decltype(userid_)>(row.id);
                 session_id_ = std::time(nullptr);
                 conn(sqlpp::update(table).set(table.online = 1,
                                               table.loginCount = row.loginCount + 1,
@@ -159,7 +159,7 @@ void CLoginClient::OnDisconnected() {
   auto res = conn(sqlpp::select(session.id).from(session)
                   .where(session.id == session_id_));
   if (res.empty()) {
-    Core::AccountTable account;
+    Core::AccountTable account{};
     conn(sqlpp::update(account).set(account.online = 0)
          .where(account.id == userid_));
   }
@@ -216,7 +216,7 @@ bool CLoginClient::ServerSelect(
     CLoginISC* server = static_cast<CLoginISC*>(obj.get());
     if (server->get_type() == Isc::ServerType::CHAR &&
         server->get_id() == serverID) {
-      Core::SessionTable session;
+      Core::SessionTable session{};
       auto conn = Core::connectionPool.getConnection(Core::osirose);
       conn(sqlpp::insert_into(session).set(
                     session.id = session_id_,

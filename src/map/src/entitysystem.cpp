@@ -103,9 +103,9 @@ bool EntitySystem::dispatch(Entity entity, std::unique_ptr<RoseCommon::CRosePack
 
 Entity EntitySystem::loadCharacter(uint32_t charId, bool platinium, uint32_t id) {
     auto conn = Core::connectionPool.getConnection(Core::osirose);
-    Core::CharacterTable characters;
-    Core::InventoryTable inventoryTable;
-    Core::SkillTable skillsTable;
+    Core::CharacterTable characters{};
+    Core::InventoryTable inventoryTable{};
+    Core::SkillTable skillsTable{};
 
     auto charRes = conn(sqlpp::select(sqlpp::count(characters.id), sqlpp::all_of(characters))
                 .from(characters)
@@ -166,7 +166,7 @@ void EntitySystem::saveCharacter(uint32_t charId, Entity entity) {
     if (!entity)
         return;
     auto conn = Core::connectionPool.getConnection(Core::osirose);
-    Core::CharacterTable characters;
+    Core::CharacterTable characters{};
 
     using sqlpp::parameter;
 
@@ -186,7 +186,7 @@ void EntitySystem::saveCharacter(uint32_t charId, Entity entity) {
 
     //entity.component<Skills>()->commitToUpdate(updateSkills);
 
-    Core::InventoryTable inv;
+    Core::InventoryTable inv{};
     auto invRes = conn(sqlpp::select(sqlpp::all_of(inv))
                        .from(inv)
                        .where(inv.charId == charId));
